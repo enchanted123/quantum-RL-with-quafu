@@ -7,10 +7,14 @@ In this 4-qubit quantum circuit, $\mathbf{x}_1(\theta)$ refers to a variational 
 
 During evolutionary process, multi-objective is set to gain higher performance in RL task and reduce entanglement to achieve lower depth of compiled circuits.
 
-Then, according to the effective architecture selected, one can train the model with Cirq simulator or Quafu backend. This file provides pre-trained model in './weights' of both ways and visualize them with animation in './visualization'. Noticeablely, the RL environment is chosen to CarPole-v1.
+Then, according to the effective architecture selected, one can train the model with Cirq simulator or Quafu backend. This file provides pre-trained model in './weights' of both ways and visualize them with animation in './visualization'. Noticeablely, the RL environment is chosen to CartPole-v1.
 
+![image2](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_CartPole_test.gif)
 
-The jupyter notebook in repo shows a simple example with pre-trained models.
+# Usage
+If you want to use the pre-trained model directly, the jupyter notebook in repo shows how to interact with Quafu and can output a gif if you have an access to display or you can refer to './validation/quantum_test.py' to infer pre-trained model and get corresponding records in a 'log.txt'.
+
+If you want to train the model from scratch, you may need download this repo and set some paths to run the whole process, it's important to get your own token by registering on http://quafu.baqis.ac.cn/ .
 
 # References
 Evolutionary Quantum Architecture Search for Parametrized Quantum Circuits, L. Ding and L. Spector, arXiv:2208.11167.
