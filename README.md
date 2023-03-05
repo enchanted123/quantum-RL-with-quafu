@@ -1,7 +1,7 @@
 # Quantum reinforcement learning with cloud Quafu
 This project implements reinforcement learning(RL) based on parameterized quantum circuits(PQCs) with quantum computing cloud Quafu. The work first searches a suitable architecture through four modules including variational PQC, data-encoding PQC, entanglement and measurement as shown in the follwing figure.
 
-<img src="E:\baqis\quantum_rl\img\4modules.png" alt="4modules" style="zoom:50%;" />
+![image1](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/4modules.png)
 
 In this 4-qubit quantum circuit, $\mathbf{x}_1(\theta)$ refers to a variational PQC, $\mathbf{x}_2(d, \lambda)$ indicates a data-encoding PQC, $\mathbf{x}_3$ is the entanglement part and $\mathbf{x}_0(\psi)$ displays a measurement part.
 
