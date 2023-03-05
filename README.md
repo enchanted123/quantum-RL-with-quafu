@@ -3,8 +3,11 @@ This project implements reinforcement learning(RL) based on parameterized quantu
 
 ![image1](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/4modules.png)
 
-In this 4-qubit quantum circuit, $\mathbf{x}_1(\theta)$ refers to a variational PQC, $\mathbf{x}_2(d, \lambda)$ indicates a data-encoding PQC, $\mathbf{x}_3$ is the entanglement part and $\mathbf{x}_0(\psi)$ displays a measurement part.
+In this 4-qubit quantum circuit, $\mathbf{x}_1(\theta)$ refers to a variational PQC, $\mathbf{x}_2(d, \lambda)$ indicates a data-encoding PQC, $\mathbf{x}_3$ is the entanglement part and $\mathbf{x}_0(\psi)$ displays a measurement part. 
 
+During evolutionary process, multi-objective is set to gain higher performance in RL task and reduce entanglement to achieve lower depth of compiled circuits.
+
+Then, according to the effective architecture selected, one can train the model with Cirq simulator or Quafu backend. This file provides pre-trained model in './weights' of both ways and visualize them with animation in './visualization'. Noticeablely, the RL environment is chosen to CarPole-v1.
 
 
 The jupyter notebook in repo shows a simple example with pre-trained models.
@@ -19,3 +22,5 @@ Parametrized Quantum Policies for Reinforcement Learnining, S. Jerbi, et al, arX
 https://github.com/ianwhale/nsga-net
 
 https://tensorflow.google.cn/quantum/tutorials/quantum_reinforcement_learning
+
+https://github.com/ScQ-Cloud/pyquafu
