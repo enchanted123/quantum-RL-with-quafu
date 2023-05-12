@@ -1,56 +1,37 @@
-'''
-Author: jinyuxin
-Date: 2022-10-25 22:28:49
-Review: 2022-03-03 11:40:20
-Description: Infer quantum models using stored weights.
-'''
-
-import tensorflow as tf
-from sympy import im
-
-# device
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-  # Restrict TensorFlow to only use the first GPU
-  try:
-    tf.config.set_visible_devices(gpus[1], 'GPU')
-    logical_gpus = tf.config.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
-  except RuntimeError as e:
-    # Visible devices must be set before GPUs have been initialized
-    print(e)
-
-import sys
-
-# update your projecty root path before running
-sys.path.insert(0, ' ')
-# for example, '/home/user/Documents/quantum_rl/nsga_net'
-
 import argparse
 import logging
 import os
+import sys
+# sys.path.insert(0, ' ')
 import time
 from functools import reduce
 
 import cirq
+import gym
 # model imports
 import models.quantum_genotypes as genotypes
 import numpy as np
+import tensorflow as tf
 from misc import utils
+from models.quantum_models import generate_circuit
 from models.quantum_models import generate_model_policy as Network
-from search.quantum_train_search import gather_episodes
+from models.quantum_models import get_model_circuit_params
+from search.quantum_train_search import compute_returns, gather_episodes
+from sympy import im
+from visualization.qrl import get_obs_policy, get_quafu_exp
 
-parser = argparse.ArgumentParser('Quantum RL Testing')
-parser.add_argument('--save', type=str, default='qEXP', help='experiment name')
+parser = argparse.ArgumentParser('Quantum RL Inference')
+parser.add_argument('--save', type=str, default='qEXP_quafu', help='experiment name')
 parser.add_argument('--batch_size', type=int, default=1, help='batch size')
-parser.add_argument('--infer_episodes', type=int, default=10, help='the number of infer episodes')
+parser.add_argument('--infer_episodes', type=int, default=100, help='the number of infer episodes')
 parser.add_argument('--gamma', type=float, default=1.0, help='discount parameter')
 parser.add_argument('--env_name', type=str, default="CartPole-v1", help='environment name')
 parser.add_argument('--state_bounds', type=np.array, default=np.array([2.4, 2.5, 0.21, 2.5]), help='state bounds')
 parser.add_argument('--n_qubits', type=int, default=4, help='the number of qubits')
 parser.add_argument('--n_actions', type=int, default=2, help='the number of actions')
 parser.add_argument('--arch', type=str, default='NSGANet_id10', help='which architecture to use')
-parser.add_argument('--model_path', type=str, default='./weights/weights_id10_quafu.h5', help='path of pretrained model')
+parser.add_argument('--model_path', type=str, default='./weights/weights_id10_quafu_94.h5', help='path of pretrained model')
+parser.add_argument('--beta', type=float, default=1.0, help='output parameter')
 
 args = parser.parse_args(args=[])
 args.save = 'infer-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
@@ -84,7 +65,8 @@ def infer(model):
     episode_reward_history = []
     for batch in range(args.infer_episodes // args.batch_size):
         # Gather episodes
-        tasklist, episodes = gather_episodes(args.state_bounds, args.n_actions, model, args.batch_size, args.env_name, qubits, genotype)
+        tasklist, episodes = gather_episodes(args.state_bounds, args.n_actions, model, args.batch_size, 
+                                              args.env_name, args.beta, qubits, genotype)
         logging.info(tasklist)
 
         # Group states, actions and returns in numpy arrays

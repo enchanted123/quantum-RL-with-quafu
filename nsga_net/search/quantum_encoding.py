@@ -1,9 +1,3 @@
-'''
-Author: jinyuxin
-Date: 2022-09-28 10:34:58
-Review: 2023-03-03 11:20:35
-Description: Convert bit-string to quantum architecture.
-'''
 from collections import namedtuple
 from hashlib import new
 

@@ -1,11 +1,3 @@
-'''
-Author: jinyuxin
-Date: 2022-09-28 00:26:53
-Review: 2023-03-03 10:44:30
-Description: Define NSGANet PQC policy
-'''
-# Ref: https://tensorflow.google.cn/quantum/tutorials/quantum_reinforcement_learning
-
 import cirq
 import models.quantum_genotypes as genotypes
 import numpy as np

@@ -1,33 +1,6 @@
-'''
-Author: jinyuxin
-Date: 2022-09-28 11:30:52
-Review: 2023-03-03 11:32:25
-Description: Define quantum training process.
-'''
-# Ref: https://tensorflow.google.cn/quantum/tutorials/quantum_reinforcement_learning
-
-import tensorflow as tf
-
-# device
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-  # Restrict TensorFlow to only use the first GPU
-  try:
-    tf.config.set_visible_devices(gpus[1], 'GPU')
-    logical_gpus = tf.config.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
-  except RuntimeError as e:
-    # Visible devices must be set before GPUs have been initialized
-    print(e)
-
-import sys
-
-# update your projecty root path before running
-sys.path.insert(0, ' ')
-# for example, '/home/user/Documents/quantum_rl/nsga_net'
-
 import logging
 import os
+import sys
 import time
 from collections import defaultdict
 from functools import reduce
@@ -35,6 +8,7 @@ from functools import reduce
 import cirq
 import gym
 import numpy as np
+import tensorflow as tf
 from misc import utils
 from models.quantum_models import generate_circuit
 from models.quantum_models import generate_model_policy as Network
@@ -43,7 +17,11 @@ from search import quantum_encoding
 from visualization.qrl import get_obs_policy, get_quafu_exp
 
 
-def gather_episodes(state_bounds, n_actions, model, n_episodes, env_name, qubits=None, genotype=None):
+def get_height(position):
+    return np.sin(3 * position)*.45+.55
+
+
+def gather_episodes(state_bounds, n_actions, model, n_episodes, env_name, beta, qubits=None, genotype=None):
     """Interact with environment in batched fashion."""
 
     trajectories = [defaultdict(list) for _ in range(n_episodes)]
@@ -57,6 +35,7 @@ def gather_episodes(state_bounds, n_actions, model, n_episodes, env_name, qubits
     while not all(done):
         unfinished_ids = [i for i in range(n_episodes) if not done[i]]
         normalized_states = [s/state_bounds for i, s in enumerate(states) if not done[i]]
+        # height = [get_height(s[0]) for i, s in enumerate(states) if not done[i]]
 
         for i, state in zip(unfinished_ids, normalized_states):
             trajectories[i]['states'].append(state)
@@ -73,17 +52,21 @@ def gather_episodes(state_bounds, n_actions, model, n_episodes, env_name, qubits
         # print('gather_episodes_exp:', expectation)
 
         obsw = model.get_layer('observables-policy').get_weights()[0]
-        obspolicy = get_obs_policy(obsw)
+        obspolicy = get_obs_policy(obsw, beta)
         action_probs = obspolicy(expectation)
         # print('gather_episodes_policy:', action_probs)
 
         # Store action and transition all environments to the next state
         states = [None for i in range(n_episodes)]
         for i, policy in zip(unfinished_ids, action_probs.numpy()):
+            trajectories[i]['action_probs'].append(policy)
             action = np.random.choice(n_actions, p=policy)
             states[i], reward, done[i], _ = envs[i].step(action)
             trajectories[i]['actions'].append(action)
-            trajectories[i]['rewards'].append(reward)
+            if env_name == "CartPole-v1":
+                trajectories[i]['rewards'].append(reward)
+            elif env_name == "MountainCar-v0":
+                trajectories[i]['rewards'].append(reward + get_height(states[i][0]))
 
     return tasklist, trajectories
 
@@ -104,8 +87,9 @@ def compute_returns(rewards_history, gamma):
     return returns
 
 
-def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_size = 10, gamma = 1,
-         state_bounds = np.array([2.4, 2.5, 0.21, 2.5]), env_name = "CartPole-v1", save='quantum', expr_root='search'):
+def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_size = 10, gamma = 1, beta = 1.0,
+         state_bounds = np.array([2.4, 2.5, 0.21, 2.5]), env_name = "CartPole-v1", save='quantum', expr_root='search',
+         lr_in = 0.1, lr_var = 0.01, lr_out = 0.1):
     """Main training process"""
     save_pth = os.path.join(expr_root, '{}'.format(save))
     utils.create_exp_dir(save_pth)
@@ -117,14 +101,14 @@ def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_si
     logging.getLogger().addHandler(fh)
 
     nb, genotype = quantum_encoding.convert2arch(bit_string)
-    model = Network(qubits, genotype, n_actions, observables)
+    model = Network(qubits, genotype, n_actions, beta, observables, env_name)
     
     logging.info("Genome = %s", nb)
     logging.info("Architecture = %s", genotype)
 
-    optimizer_in = tf.keras.optimizers.Adam(learning_rate=0.1, amsgrad=True)
-    optimizer_var = tf.keras.optimizers.Adam(learning_rate=0.01, amsgrad=True)
-    optimizer_out = tf.keras.optimizers.Adam(learning_rate=0.1, amsgrad=True)
+    optimizer_in = tf.keras.optimizers.Adam(learning_rate=lr_in, amsgrad=True)
+    optimizer_var = tf.keras.optimizers.Adam(learning_rate=lr_var, amsgrad=True)
+    optimizer_out = tf.keras.optimizers.Adam(learning_rate=lr_out, amsgrad=True)
 
     # Assign the model parameters to each optimizer
     w_in, w_var, w_out = 1, 0, 2
@@ -149,7 +133,7 @@ def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_si
     episode_reward_history = []
     for batch in range(n_episodes // batch_size):
         # Gather episodes
-        episodes = gather_episodes(state_bounds, n_actions, model, batch_size, env_name)
+        episodes = gather_episodes(state_bounds, n_actions, model, batch_size, env_name, beta)
 
         # Group states, actions and returns in numpy arrays
         states = np.concatenate([ep['states'] for ep in episodes])
@@ -172,6 +156,8 @@ def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_si
         logging.info('Finished episode: %f', (batch + 1) * batch_size)
         logging.info('Average rewards: %f', avg_rewards)
     
-        if avg_rewards >= 500.0:
+        if avg_rewards >= 500.0 and env_name == "CartPole-v1":
+            break
+        elif avg_rewards >= -110 and env_name == "MountainCar-v0":
             break
     return episode_reward_history

@@ -1,0 +1,154 @@
+2023-04-24 13:24:19,947 args = Namespace(arch='Layer5_CP', batch_size=10, env_name='CartPole-v1', epochs=1, gamma=1.0, infer_episodes=5, n_actions=2, n_episodes=500, n_qubits=4, save='train-qEXP-archtest-20230424-132419', state_bounds=array([2.4 , 2.5 , 0.21, 2.5 ]))
+2023-04-24 13:24:20,868 epoch 0
+2023-04-24 13:24:22,160 []
+2023-04-24 13:24:23,523 train finished episode: 10.000000
+2023-04-24 13:24:23,524 train average rewards: 20.300000
+2023-04-24 13:24:24,046 []
+2023-04-24 13:24:24,923 train finished episode: 20.000000
+2023-04-24 13:24:24,923 train average rewards: 20.900000
+2023-04-24 13:24:25,899 []
+2023-04-24 13:24:26,818 train finished episode: 30.000000
+2023-04-24 13:24:26,819 train average rewards: 31.900000
+2023-04-24 13:24:27,734 []
+2023-04-24 13:24:28,605 train finished episode: 40.000000
+2023-04-24 13:24:28,605 train average rewards: 33.600000
+2023-04-24 13:24:29,514 []
+2023-04-24 13:24:30,139 train finished episode: 50.000000
+2023-04-24 13:24:30,139 train average rewards: 31.900000
+2023-04-24 13:24:31,805 []
+2023-04-24 13:24:33,151 5 out of the last 6 calls to <function train.<locals>.reinforce_update at 0x7f0ff419d670> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has experimental_relax_shapes=True option that relaxes argument shapes that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+2023-04-24 13:24:33,157 train finished episode: 60.000000
+2023-04-24 13:24:33,157 train average rewards: 60.600000
+2023-04-24 13:24:34,494 []
+2023-04-24 13:24:35,656 6 out of the last 7 calls to <function train.<locals>.reinforce_update at 0x7f0ff419d670> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has experimental_relax_shapes=True option that relaxes argument shapes that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+2023-04-24 13:24:35,657 train finished episode: 70.000000
+2023-04-24 13:24:35,657 train average rewards: 52.500000
+2023-04-24 13:24:38,502 []
+2023-04-24 13:24:40,357 train finished episode: 80.000000
+2023-04-24 13:24:40,358 train average rewards: 100.000000
+2023-04-24 13:24:43,603 []
+2023-04-24 13:24:45,482 train finished episode: 90.000000
+2023-04-24 13:24:45,482 train average rewards: 110.500000
+2023-04-24 13:24:48,614 []
+2023-04-24 13:24:50,271 train finished episode: 100.000000
+2023-04-24 13:24:50,272 train average rewards: 119.700000
+2023-04-24 13:24:54,159 []
+2023-04-24 13:24:56,467 train finished episode: 110.000000
+2023-04-24 13:24:56,467 train average rewards: 149.400000
+2023-04-24 13:25:00,232 []
+2023-04-24 13:25:02,367 train finished episode: 120.000000
+2023-04-24 13:25:02,367 train average rewards: 142.300000
+2023-04-24 13:25:05,976 []
+2023-04-24 13:25:08,293 train finished episode: 130.000000
+2023-04-24 13:25:08,293 train average rewards: 146.900000
+2023-04-24 13:25:12,494 []
+2023-04-24 13:25:15,050 train finished episode: 140.000000
+2023-04-24 13:25:15,051 train average rewards: 191.600000
+2023-04-24 13:25:19,795 []
+2023-04-24 13:25:22,771 train finished episode: 150.000000
+2023-04-24 13:25:22,771 train average rewards: 202.800000
+2023-04-24 13:25:27,610 []
+2023-04-24 13:25:30,671 train finished episode: 160.000000
+2023-04-24 13:25:30,671 train average rewards: 213.100000
+2023-04-24 13:25:36,574 []
+2023-04-24 13:25:39,621 train finished episode: 170.000000
+2023-04-24 13:25:39,622 train average rewards: 251.800000
+2023-04-24 13:25:46,675 []
+2023-04-24 13:25:50,226 train finished episode: 180.000000
+2023-04-24 13:25:50,226 train average rewards: 284.700000
+2023-04-24 13:25:58,765 []
+2023-04-24 13:26:03,154 train finished episode: 190.000000
+2023-04-24 13:26:03,154 train average rewards: 356.300000
+2023-04-24 13:26:11,751 []
+2023-04-24 13:26:16,819 train finished episode: 200.000000
+2023-04-24 13:26:16,819 train average rewards: 383.500000
+2023-04-24 13:26:25,189 []
+2023-04-24 13:26:29,634 train finished episode: 210.000000
+2023-04-24 13:26:29,634 train average rewards: 386.200000
+2023-04-24 13:26:38,262 []
+2023-04-24 13:26:42,772 train finished episode: 220.000000
+2023-04-24 13:26:42,773 train average rewards: 372.900000
+2023-04-24 13:26:50,217 []
+2023-04-24 13:26:54,047 train finished episode: 230.000000
+2023-04-24 13:26:54,047 train average rewards: 328.400000
+2023-04-24 13:27:00,063 []
+2023-04-24 13:27:03,341 train finished episode: 240.000000
+2023-04-24 13:27:03,341 train average rewards: 265.800000
+2023-04-24 13:27:09,051 []
+2023-04-24 13:27:12,148 train finished episode: 250.000000
+2023-04-24 13:27:12,213 train average rewards: 250.500000
+2023-04-24 13:27:17,024 []
+2023-04-24 13:27:19,810 train finished episode: 260.000000
+2023-04-24 13:27:19,810 train average rewards: 230.700000
+2023-04-24 13:27:25,541 []
+2023-04-24 13:27:28,349 train finished episode: 270.000000
+2023-04-24 13:27:28,349 train average rewards: 226.200000
+2023-04-24 13:27:32,749 []
+2023-04-24 13:27:35,200 train finished episode: 280.000000
+2023-04-24 13:27:35,200 train average rewards: 201.700000
+2023-04-24 13:27:39,404 []
+2023-04-24 13:27:41,823 train finished episode: 290.000000
+2023-04-24 13:27:41,823 train average rewards: 193.200000
+2023-04-24 13:27:45,461 []
+2023-04-24 13:27:48,075 train finished episode: 300.000000
+2023-04-24 13:27:48,075 train average rewards: 174.700000
+2023-04-24 13:27:51,767 []
+2023-04-24 13:27:53,915 train finished episode: 310.000000
+2023-04-24 13:27:53,915 train average rewards: 169.000000
+2023-04-24 13:27:57,327 []
+2023-04-24 13:27:59,746 train finished episode: 320.000000
+2023-04-24 13:27:59,747 train average rewards: 179.300000
+2023-04-24 13:28:03,436 []
+2023-04-24 13:28:05,722 train finished episode: 330.000000
+2023-04-24 13:28:05,723 train average rewards: 184.700000
+2023-04-24 13:28:09,398 []
+2023-04-24 13:28:11,703 train finished episode: 340.000000
+2023-04-24 13:28:11,703 train average rewards: 185.900000
+2023-04-24 13:28:15,567 []
+2023-04-24 13:28:17,880 train finished episode: 350.000000
+2023-04-24 13:28:17,880 train average rewards: 186.000000
+2023-04-24 13:28:22,257 []
+2023-04-24 13:28:24,735 train finished episode: 360.000000
+2023-04-24 13:28:24,735 train average rewards: 190.200000
+2023-04-24 13:28:28,699 []
+2023-04-24 13:28:31,191 train finished episode: 370.000000
+2023-04-24 13:28:31,191 train average rewards: 187.300000
+2023-04-24 13:28:34,925 []
+2023-04-24 13:28:37,186 train finished episode: 380.000000
+2023-04-24 13:28:37,186 train average rewards: 184.300000
+2023-04-24 13:28:41,103 []
+2023-04-24 13:28:43,135 train finished episode: 390.000000
+2023-04-24 13:28:43,135 train average rewards: 185.900000
+2023-04-24 13:28:47,486 []
+2023-04-24 13:28:49,669 train finished episode: 400.000000
+2023-04-24 13:28:49,669 train average rewards: 176.200000
+2023-04-24 13:28:53,920 []
+2023-04-24 13:28:56,586 train finished episode: 410.000000
+2023-04-24 13:28:56,586 train average rewards: 196.600000
+2023-04-24 13:29:00,171 []
+2023-04-24 13:29:02,581 train finished episode: 420.000000
+2023-04-24 13:29:02,581 train average rewards: 173.800000
+2023-04-24 13:29:05,949 []
+2023-04-24 13:29:08,075 train finished episode: 430.000000
+2023-04-24 13:29:08,075 train average rewards: 170.100000
+2023-04-24 13:29:11,617 []
+2023-04-24 13:29:13,647 train finished episode: 440.000000
+2023-04-24 13:29:13,648 train average rewards: 162.900000
+2023-04-24 13:29:17,201 []
+2023-04-24 13:29:19,562 train finished episode: 450.000000
+2023-04-24 13:29:19,562 train average rewards: 172.000000
+2023-04-24 13:29:22,414 []
+2023-04-24 13:29:24,530 train finished episode: 460.000000
+2023-04-24 13:29:24,530 train average rewards: 150.700000
+2023-04-24 13:29:27,862 []
+2023-04-24 13:29:30,024 train finished episode: 470.000000
+2023-04-24 13:29:30,024 train average rewards: 163.200000
+2023-04-24 13:29:33,323 []
+2023-04-24 13:29:35,449 train finished episode: 480.000000
+2023-04-24 13:29:35,450 train average rewards: 157.300000
+2023-04-24 13:29:38,680 []
+2023-04-24 13:29:40,751 train finished episode: 490.000000
+2023-04-24 13:29:40,751 train average rewards: 164.600000
+2023-04-24 13:29:44,001 []
+2023-04-24 13:29:46,100 train finished episode: 500.000000
+2023-04-24 13:29:46,100 train average rewards: 156.300000

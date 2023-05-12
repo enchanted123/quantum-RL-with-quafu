@@ -1,38 +1,13 @@
-'''
-Author: jinyuxin
-Date: 2022-09-28 12:18:29
-Review: 2023-03-03 11:27:55
-Description: Define multi-objetive genetic algorithm for quantum architecture search.
-'''
-
-import tensorflow as tf
-
-# device
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-  # Restrict TensorFlow to only use the first GPU
-  try:
-    tf.config.set_visible_devices(gpus[1], 'GPU')
-    logical_gpus = tf.config.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
-  except RuntimeError as e:
-    # Visible devices must be set before GPUs have been initialized
-    print(e)
-
-import sys
-
-# update your projecty root path before running
-sys.path.insert(0, ' ')
-# for example, '/home/user/Documents/quantum_rl/nsga_net'
-
 import argparse
 import logging
 import os
+import sys
 import time
 from functools import reduce
 
 import cirq
 import numpy as np
+import tensorflow as tf
 from misc import utils
 from pymoo.optimize import minimize
 from pymop.problem import Problem
@@ -129,18 +104,12 @@ def do_every_generations(algorithm):
                                                   np.median(pop_obj[:, 1]), np.max(pop_obj[:, 1]), np.where(pop_obj[:, 1]==np.min(pop_obj[:, 1]))))
 
 
-def main():
+def main(qubits, n_actions, observables):
     logging.info("args = %s", args)
 
     # setup NAS search problem
     lb = np.zeros(args.n_var)
     ub = np.ones(args.n_var) * 3
-
-    n_qubits = 4 # Dimension of the state vectors in CartPole
-    n_actions = 2 # Number of actions in CartPole
-    qubits = cirq.GridQubit.rect(1, n_qubits)
-    ops = [cirq.Z(q) for q in qubits]
-    observables = [reduce((lambda x, y: x * y), ops)] # Z_0*Z_1*Z_2*Z_3
 
     problem = NAS(qubits, n_actions, observables, lb=lb, ub=ub, n_var=args.n_var,
                   n_episodes=args.n_episodes, save_dir=args.save)
@@ -159,4 +128,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    n_qubits = 4 # Dimension of the state vectors in CartPole
+    n_actions = 2 # Number of actions in CartPole
+    qubits = cirq.GridQubit.rect(1, n_qubits)
+    ops = [cirq.Z(q) for q in qubits]
+    observables = [reduce((lambda x, y: x * y), ops)] # Z_0*Z_1*Z_2*Z_3
+    main(qubits, n_actions, observables)

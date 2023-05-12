@@ -1,32 +1,6 @@
-'''
-Author: jinyuxin
-Date: 2022-10-31 16:51:40
-ReviewDate: 2023-02-27 12:01:02
-Description: Interaction with quafu cloud platform and plot the animation.
-'''
-
-import tensorflow as tf
-
-# device
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-  # Restrict TensorFlow to only use the first GPU
-  try:
-    tf.config.set_visible_devices(gpus[2], 'GPU')
-    logical_gpus = tf.config.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
-  except RuntimeError as e:
-    # Visible devices must be set before GPUs have been initialized
-    print(e)
-
-import sys
-
-# update your projecty root path before running
-sys.path.insert(0, ' ')
-# for example, '/home/user/Documents/quantum_rl/nsga_net'
-
 import argparse
 import re
+import sys
 from functools import reduce
 
 import cirq
@@ -34,6 +8,7 @@ import gym
 # model imports
 import models.quantum_genotypes as genotypes
 import numpy as np
+import tensorflow as tf
 from models.quantum_models import generate_circuit
 from models.quantum_models import generate_model_policy as Network
 from models.quantum_models import get_model_circuit_params
@@ -41,18 +16,20 @@ from PIL import Image
 from quafu import QuantumCircuit as quafuQC
 from quafu import Task, User
 
-parser = argparse.ArgumentParser('TensorFlow quantum RL Episode Visualization')
-parser.add_argument('--env_name', type=str, default="CartPole-v1", help='environment name')
+parser = argparse.ArgumentParser('Reinforcement learining with quantum computing cloud Quafu')
+parser.add_argument('--env_name', type=str, default='CartPole-v1', help='environment name')
 parser.add_argument('--state_bounds', type=np.array, default=np.array([2.4, 2.5, 0.21, 2.5]), help='state bounds')
 parser.add_argument('--n_qubits', type=int, default=4, help='the number of qubits')
 parser.add_argument('--n_actions', type=int, default=2, help='the number of actions')
-parser.add_argument('--arch', type=str, default='NSGANet_id97', help='which architecture to use')
-parser.add_argument('--model_path', type=str, default='./weights/weights_id97_quafu.h5', help='path of pretrained model')
+parser.add_argument('--arch', type=str, default='NSGANet_id10', help='which architecture to use')
+parser.add_argument('--shots', type=int, default=1000, help='the number of sampling')
+parser.add_argument('--backend', type=str, default='ScQ-P10', help='which backend to use')
+parser.add_argument('--model_path', type=str, default='./weights/weights_id10_quafu_94.h5', help='path of pretrained model')
 args = parser.parse_args(args=[])
 
 
 def get_res_exp(res):
-    # access to probabilities of all possibilities 
+    # access to probabilities of all possibilities Z_0*Z_1*Z_2*Z_3
     prob = res.probabilities
     sumexp = 0
     for k, v in prob.items():
@@ -86,8 +63,8 @@ def get_quafu_exp(circuit):
     task.load_account()
     
     # choose sampling number and specific quantum devices
-    shots = 1000    
-    task.config(backend='ScQ-P20', shots=shots, compile=True)
+    shots = args.shots   
+    task.config(backend=args.backend, shots=shots, compile=True, priority=3)
     task_id = task.send(q, wait=True).taskid
     print('task_id:', task_id)
     
@@ -98,13 +75,37 @@ def get_quafu_exp(circuit):
         task.load_account()
         res = task.retrieve(task_id)
         OB = get_res_exp(res)
-
-    # obslist = [["Z", [i]] for i in range(args.n_qubits)]
-    # res, obs = task.submit(q, obslist)
-    # OB = sum(obs)
-    # print('task_id:', res[0].taskid)
-
     return task_id, tf.convert_to_tensor([[OB]])
+
+
+def get_compiled_gates_depth(circuit):
+    openqasm = circuit.to_qasm(header='')
+    openqasm = re.sub('//.*\n', '', openqasm)
+    openqasm = "".join([s for s in openqasm.splitlines(True) if s.strip()])
+    
+    user = User()
+    user.save_apitoken(" ")
+    
+    q = quafuQC(args.n_qubits)
+    q.from_openqasm(openqasm)
+    
+    task = Task()
+    task.load_account()
+    
+    shots = args.shots   
+    task.config(backend=args.backend, shots=shots, compile=True)
+    task_id = task.send(q, wait=True).taskid
+    print('task_id:', task_id)
+    
+    task_status = task.retrieve(task_id).task_status
+    if task_status == 'Completed':
+        task = Task()
+        task.load_account()
+        res = task.retrieve(task_id)
+        OB = get_res_exp(res)
+        gates = res.transpiled_circuit.gates
+        layered_circuit = res.transpiled_circuit.layered_circuit()
+    return task_id, tf.convert_to_tensor([[OB]]), gates, layered_circuit
 
 
 class Alternating_(tf.keras.layers.Layer):
@@ -114,13 +115,12 @@ class Alternating_(tf.keras.layers.Layer):
             initial_value=tf.constant(obsw), dtype="float32", trainable=True, name="obsw")
 
     def call(self, inputs):
-        # print('exp:', inputs)
         return tf.matmul(inputs, self.w)
 
 
-def get_obs_policy(obsw):
+def get_obs_policy(obsw, beta):
     process = tf.keras.Sequential([ Alternating_(obsw),
-                                    tf.keras.layers.Lambda(lambda x: x * 1.0),
+                                    tf.keras.layers.Lambda(lambda x: x * beta),
                                     tf.keras.layers.Softmax()
                                 ], name="obs_policy")
     return process
@@ -134,31 +134,35 @@ if __name__ == "__main__":
     model = Network(qubits, genotype, args.n_actions, observables)
     model.load_weights(args.model_path)
 
-    # update gym
+    # update gym to the version having render_mode, which is 0.26.1 in this file
+    
     env = gym.make(args.env_name, render_mode="rgb_array")
     state, _ = env.reset()
     frames = []
-    alist = []
-    for epi in range(10):
+
+    for epi in range(20):
         im = Image.fromarray(env.render())
         frames.append(im)  
-        # policy = model([tf.convert_to_tensor([state/args.state_bounds])])
-
+    
+        # get PQC model parameters and expectations
         stateb = state/args.state_bounds
         newtheta, newlamda = get_model_circuit_params(qubits, genotype, model)
         circuit, _, _ = generate_circuit(qubits, genotype, newtheta, newlamda, stateb)
         _, expectation = get_quafu_exp(circuit)
-
+    
+        # get policy model parameters
         obsw = model.get_layer('observables-policy').get_weights()[0]
         obspolicy = get_obs_policy(obsw)
         policy = obspolicy(expectation)
-
         print('policy:', policy)
+    
+        # choose actions and make a step
         action = np.random.choice(args.n_actions, p=policy.numpy()[0])
         state, reward, terminated, truncated, _ = env.step(action)
         if terminated or truncated:
             print(epi+1)
             break
     env.close()
+
+    # save gif to your path
     frames[1].save(' ', save_all=True, append_images=frames[2:], optimize=False, duration=20, loop=0)
-    # for example, './visualization/id97_quafu_gif/gym_CartPole_10.gif'

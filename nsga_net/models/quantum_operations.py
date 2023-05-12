@@ -1,11 +1,3 @@
-'''
-Author: jinyuxin
-Date: 2022-09-27 15:40:31
-Review: 2023-03-03 10:16:15
-Description: Define quantum operations including modules of variational PQC, data-encoding PQC and entanglement.
-'''
-# Ref: https://tensorflow.google.cn/quantum/tutorials/quantum_reinforcement_learning
-
 import cirq
 import numpy as np
 import sympy
