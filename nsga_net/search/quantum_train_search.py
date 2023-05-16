@@ -2,97 +2,25 @@ import logging
 import os
 import sys
 import time
-from collections import defaultdict
+
 from functools import reduce
 
-import cirq
-import gym
 import numpy as np
 import tensorflow as tf
-from misc import utils
-from models.quantum_models import generate_circuit
+
+from misc.utils import gather_episodes, compute_returns, create_exp_dir
 from models.quantum_models import generate_model_policy as Network
-from models.quantum_models import get_model_circuit_params
 from search import quantum_encoding
-from visualization.qrl import get_obs_policy, get_quafu_exp
-
-
-def get_height(position):
-    return np.sin(3 * position)*.45+.55
-
-
-def gather_episodes(state_bounds, n_actions, model, n_episodes, env_name, beta, qubits=None, genotype=None):
-    """Interact with environment in batched fashion."""
-
-    trajectories = [defaultdict(list) for _ in range(n_episodes)]
-    envs = [gym.make(env_name) for _ in range(n_episodes)]
-
-    done = [False for _ in range(n_episodes)]
-    states = [e.reset() for e in envs]
-
-    tasklist = []
-
-    while not all(done):
-        unfinished_ids = [i for i in range(n_episodes) if not done[i]]
-        normalized_states = [s/state_bounds for i, s in enumerate(states) if not done[i]]
-        # height = [get_height(s[0]) for i, s in enumerate(states) if not done[i]]
-
-        for i, state in zip(unfinished_ids, normalized_states):
-            trajectories[i]['states'].append(state)
-
-        # Compute policy for all unfinished envs in parallel
-        states = tf.convert_to_tensor(normalized_states)
-
-        # You can choose action probabilities trained by Cirq simulator or Quafu cloud
-        # action_probs = model([states])
-        newtheta, newlamda = get_model_circuit_params(qubits, genotype, model)
-        circuit, _, _ = generate_circuit(qubits, genotype, newtheta, newlamda, states.numpy()[0])
-        taskid, expectation = get_quafu_exp(circuit)
-        tasklist.append(taskid)
-        # print('gather_episodes_exp:', expectation)
-
-        obsw = model.get_layer('observables-policy').get_weights()[0]
-        obspolicy = get_obs_policy(obsw, beta)
-        action_probs = obspolicy(expectation)
-        # print('gather_episodes_policy:', action_probs)
-
-        # Store action and transition all environments to the next state
-        states = [None for i in range(n_episodes)]
-        for i, policy in zip(unfinished_ids, action_probs.numpy()):
-            trajectories[i]['action_probs'].append(policy)
-            action = np.random.choice(n_actions, p=policy)
-            states[i], reward, done[i], _ = envs[i].step(action)
-            trajectories[i]['actions'].append(action)
-            if env_name == "CartPole-v1":
-                trajectories[i]['rewards'].append(reward)
-            elif env_name == "MountainCar-v0":
-                trajectories[i]['rewards'].append(reward + get_height(states[i][0]))
-
-    return tasklist, trajectories
-
-
-def compute_returns(rewards_history, gamma):
-    """Compute discounted returns with discount factor `gamma`."""
-    returns = []
-    discounted_sum = 0
-    for r in rewards_history[::-1]:
-        discounted_sum = r + gamma * discounted_sum
-        returns.insert(0, discounted_sum)
-
-    # Normalize them for faster and more stable learning
-    returns = np.array(returns)
-    returns = (returns - np.mean(returns)) / (np.std(returns) + 1e-8)
-    returns = returns.tolist()
-
-    return returns
 
 
 def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_size = 10, gamma = 1, beta = 1.0,
          state_bounds = np.array([2.4, 2.5, 0.21, 2.5]), env_name = "CartPole-v1", save='quantum', expr_root='search',
-         lr_in = 0.1, lr_var = 0.01, lr_out = 0.1):
-    """Main training process"""
+         lr_in = 0.1, lr_var = 0.01, lr_out = 0.1, backend = 'cirq'):
+    """
+    Main training process in multi-objective search.
+    """
     save_pth = os.path.join(expr_root, '{}'.format(save))
-    utils.create_exp_dir(save_pth)
+    create_exp_dir(save_pth)
     log_format = '%(asctime)s %(message)s'
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                         format=log_format, datefmt='%m/%d %I:%M:%S %p')
@@ -133,7 +61,7 @@ def main(bit_string, qubits, n_actions, observables, n_episodes = 1000, batch_si
     episode_reward_history = []
     for batch in range(n_episodes // batch_size):
         # Gather episodes
-        episodes = gather_episodes(state_bounds, n_actions, model, batch_size, env_name, beta)
+        _, episodes = gather_episodes(state_bounds, n_actions, model, batch_size, env_name, beta, backend)
 
         # Group states, actions and returns in numpy arrays
         states = np.concatenate([ep['states'] for ep in episodes])

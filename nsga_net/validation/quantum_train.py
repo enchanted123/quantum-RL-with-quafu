@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-sys.path.insert(0, ' ')
+sys.path.insert(0, '/home/jinyuxin/Documents/quantum_rl_0516/nsga_net')
 import time
 from functools import reduce
 
@@ -13,13 +13,10 @@ import gym
 import models.quantum_genotypes as genotypes
 import numpy as np
 import tensorflow as tf
-from misc import utils
-from models.quantum_models import generate_circuit
+
+from misc.utils import create_exp_dir, compute_returns, gather_episodes
 from models.quantum_models import generate_model_policy as Network
-from models.quantum_models import get_model_circuit_params
-from search.quantum_train_search import compute_returns, gather_episodes
-from sympy import im
-from visualization.qrl import get_obs_policy, get_quafu_exp
+
 
 parser = argparse.ArgumentParser('Quantum RL Training')
 parser.add_argument('--save', type=str, default='qEXP-quafu18_6', help='experiment name')
@@ -37,10 +34,14 @@ parser.add_argument('--lr_in', type=float, default=0.1, help='learning rate of i
 parser.add_argument('--lr_var', type=float, default=0.01, help='learning rate of variational parameter')
 parser.add_argument('--lr_out', type=float, default=0.1, help='learning rate of output parameter')
 parser.add_argument('--beta', type=float, default=1.0, help='output parameter')
+parser.add_argument('--model_path', type=str, default='./weights/train_p18/weights_id10_quafu_86.h5', help='path of pretrained model')
+parser.add_argument('--backend', type=str, default='quafu', help='choose cirq simulator or quafu cloud platform')
+parser.add_argument('--shots', type=int, default=1000, help='the number of sampling')
+parser.add_argument('--backend_quafu', type=str, default='ScQ-P10', help='which quafu backend to use')
 
 args = parser.parse_args(args=[])
 args.save = 'train-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
-utils.create_exp_dir(args.save)
+create_exp_dir(args.save)
 
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -54,7 +55,7 @@ def main(qubits, genotype, observables):
     logging.info("args = %s", args)
 
     model = Network(qubits, genotype, args.n_actions, args.beta, observables, args.env_name)
-    model.load_weights('./weights/weights_id10_quafu_86.h5')
+    model.load_weights(args.model_path)
 
     n_epochs = args.epochs
 
@@ -90,15 +91,6 @@ def train(model, optimizer_in, optimizer_var, optimizer_out, w_in, w_var, w_out)
         with tf.GradientTape() as tape:
             tape.watch(model.trainable_variables)
             logits = model(states)
-            # newtheta, newlamda = get_model_circuit_params(qubits, genotype, model)
-            # circuit, _, _ = generate_circuit(qubits, genotype, newtheta, newlamda, states[0].numpy()[0])
-            # expectation = get_quafu_exp(circuit)
-            # print('update_exp:', expectation)
-
-            # obsw = model.get_layer('observables-policy').get_weights()[0]
-            # obspolicy = get_obs_policy(obsw)
-            # logits = obspolicy(expectation)
-            # print('update_policy:', logits)
 
             delta = logits2 - logits
             logits = logits + delta
@@ -114,7 +106,7 @@ def train(model, optimizer_in, optimizer_var, optimizer_out, w_in, w_var, w_out)
     for batch in range(args.n_episodes // args.batch_size):
         # Gather episodes
         tasklist, episodes = gather_episodes(args.state_bounds, args.n_actions, model, args.batch_size, 
-                                              args.env_name, args.beta, qubits, genotype)
+                                              args.env_name, args.beta, args.backend, args.backend_quafu, args.shots, args.n_qubits, qubits, genotype)
         logging.info(tasklist)
         logging.info(episodes)
 
@@ -139,18 +131,6 @@ def train(model, optimizer_in, optimizer_var, optimizer_out, w_in, w_var, w_out)
 
         # Update model parameters.
         reinforce_update(states, id_action_pairs, returns, logits, model)
-
-        # # Store collected rewards
-        # for ep_rwds in rewards:
-        #     episode_reward_history.append(np.sum(ep_rwds))
-        
-
-        # if episode_reward_history[-1] >= best_reward:
-        #     best_reward = episode_reward_history[-1]
-        #     model.save_weights(os.path.join(args.save, 'weights_id10_quafu_{}.h5'.format(int(best_reward))))
-        # elif episode_reward_history[-1] >= 30:
-        #     model.save_weights(os.path.join(args.save, 'weights_id10_quafu.h5'))
-
 
         avg_rewards = np.mean(episode_reward_history[-5:])
 

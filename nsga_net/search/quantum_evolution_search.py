@@ -1,14 +1,17 @@
+# Note: If you want to search the architecture from scratch, please use the command 'pip install pymoo==0.3.0' first.
 import argparse
 import logging
 import os
 import sys
+
+sys.path.insert(0, '/home/jinyuxin/Documents/quantum_rl_0516/nsga_net')
 import time
 from functools import reduce
 
 import cirq
 import numpy as np
-import tensorflow as tf
-from misc import utils
+
+from misc.utils import create_exp_dir
 from pymoo.optimize import minimize
 from pymop.problem import Problem
 from search import nsganet as engine
@@ -21,9 +24,10 @@ parser.add_argument('--pop_size', type=int, default=10, help='population size of
 parser.add_argument('--n_gens', type=int, default=10, help='number of generation')
 parser.add_argument('--n_offspring', type=int, default=10, help='number of offspring created per generation')
 parser.add_argument('--n_episodes', type=int, default=300, help='number of episodes to train during architecture search')
+
 args = parser.parse_args(args=[])
 args.save = 'search-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
-utils.create_exp_dir(args.save)
+create_exp_dir(args.save)
 
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -105,6 +109,9 @@ def do_every_generations(algorithm):
 
 
 def main(qubits, n_actions, observables):
+    """
+    Main search process in multi-obj algorithms.
+    """
     logging.info("args = %s", args)
 
     # setup NAS search problem
