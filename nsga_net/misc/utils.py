@@ -53,7 +53,7 @@ def get_quafu_exp(circuit, n_qubits, backend_quafu, shots):
     
     # fill in with your token, register on website http://quafu.baqis.ac.cn/
     user = User()
-    user.save_apitoken("ggggejCtzGi7w6r4wyma-KV_SV2ZFuWvOWayjJHw53R.9JTO5UDM5YDO2EjOiAHelJCL3YjM6ICZpJye.9JiN1IzUIJiOicGbhJCLiQ1VKJiOiAXe0Jye")
+    user.save_apitoken(" ")
     
     # initialize to Quafu circuits
     q = quafuQC(n_qubits)

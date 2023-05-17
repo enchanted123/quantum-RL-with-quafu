@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 
-sys.path.insert(0, '/home/jinyuxin/Documents/quantum_rl_0516/nsga_net')
+sys.path.insert(0, ' ')
 import time
 from functools import reduce
 

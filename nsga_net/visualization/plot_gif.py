@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-sys.path.insert(0, '/home/jinyuxin/Documents/quantum_rl_0516/nsga_net')
+sys.path.insert(0, ' ')
 from functools import reduce
 
 import cirq
