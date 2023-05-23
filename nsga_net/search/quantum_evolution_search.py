@@ -10,7 +10,6 @@ from functools import reduce
 
 import cirq
 import numpy as np
-
 from misc.utils import create_exp_dir
 from pymoo.optimize import minimize
 from pymop.problem import Problem

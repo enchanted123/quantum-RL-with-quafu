@@ -13,10 +13,8 @@ import gym
 import models.quantum_genotypes as genotypes
 import numpy as np
 import tensorflow as tf
-
-from misc.utils import create_exp_dir, compute_returns, gather_episodes
+from misc.utils import compute_returns, create_exp_dir, gather_episodes
 from models.quantum_models import generate_model_policy as Network
-
 
 parser = argparse.ArgumentParser('Quantum RL Training')
 parser.add_argument('--save', type=str, default='qEXP-quafu18_6', help='experiment name')

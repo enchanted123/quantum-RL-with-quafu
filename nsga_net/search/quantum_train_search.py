@@ -2,13 +2,11 @@ import logging
 import os
 import sys
 import time
-
 from functools import reduce
 
 import numpy as np
 import tensorflow as tf
-
-from misc.utils import gather_episodes, compute_returns, create_exp_dir
+from misc.utils import compute_returns, create_exp_dir, gather_episodes
 from models.quantum_models import generate_model_policy as Network
 from search import quantum_encoding
 

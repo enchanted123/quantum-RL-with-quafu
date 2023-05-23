@@ -1,15 +1,14 @@
-from collections import defaultdict
 import os
-import shutil
 import re
+import shutil
+from collections import defaultdict
+
 import gym
 import numpy as np
 import tensorflow as tf
-
+from models.quantum_models import generate_circuit, get_model_circuit_params
 from quafu import QuantumCircuit as quafuQC
 from quafu import Task, User
-
-from models.quantum_models import get_model_circuit_params, generate_circuit
 
 
 def create_exp_dir(path, scripts_to_save=None):
