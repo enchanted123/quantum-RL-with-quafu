@@ -25,7 +25,7 @@ parser.add_argument('--state_bounds', type=np.array, default=np.array([2.4, 2.5,
 parser.add_argument('--n_qubits', type=int, default=4, help='the number of qubits')
 parser.add_argument('--n_actions', type=int, default=2, help='the number of actions')
 parser.add_argument('--arch', type=str, default='ORI_TYPE_CP', help='which architecture to use')
-parser.add_argument('--model_path', type=str, default='../weights/example/PG/PG_CP_weights.h5', help='path of pretrained model')
+parser.add_argument('--model_path', type=str, default='../weights/example/policy+gradient/PG_CP_weights.h5', help='path of pretrained model')
 # parser.add_argument('--model_path', type=str, default='./PG_CP_weights.h5', help='path of pretrained model')
 parser.add_argument('--beta', type=float, default=1.0, help='output parameter')
 # parser.add_argument('--backend', type=str, default='quafu', help='choose cirq simulator or quafu cloud platform')
