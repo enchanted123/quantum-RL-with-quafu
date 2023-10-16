@@ -128,3 +128,111 @@ Eqas_PQC = Genotype(
         ('entanglement', 10)
     ]
 )
+
+
+ORI_TYPE_CP = Genotype(
+    measure=[
+        ('measurement', 15)
+    ],
+    vpqc=[
+        ('variationalPQC', 0),
+        ('variationalPQC', 3),
+        ('variationalPQC', 6),
+        ('variationalPQC', 9),
+        ('variationalPQC', 12),
+        # ('variationalPQC', 15),
+    ],
+    dpqc=[
+        ('dataencodingPQC', 2),
+        ('dataencodingPQC', 5),
+        ('dataencodingPQC', 8),
+        ('dataencodingPQC', 11),
+        ('dataencodingPQC', 14),
+    ],
+    entangle=[
+        ('entanglement', 1),
+        ('entanglement', 4),
+        ('entanglement', 7),
+        ('entanglement', 10),
+        ('entanglement', 13),
+    ],
+)
+
+ORI_TYPE_MC = Genotype(
+    measure=[
+        ('measurement', 18)
+    ],
+    vpqc=[
+        ('variationalPQC', 0),
+        ('variationalPQC', 3),
+        ('variationalPQC', 6),
+        ('variationalPQC', 9),
+        ('variationalPQC', 12),
+        ('variationalPQC', 15),
+    ],
+    dpqc=[
+        ('dataencodingPQC', 2),
+        ('dataencodingPQC', 5),
+        ('dataencodingPQC', 8),
+        ('dataencodingPQC', 11),
+        ('dataencodingPQC', 14),
+        ('dataencodingPQC', 16),
+    ],
+    entangle=[
+        ('entanglement', 1),
+        ('entanglement', 4),
+        ('entanglement', 7),
+        ('entanglement', 10),
+        ('entanglement', 13),
+        ('entanglement', 17),
+    ],
+)
+
+ORI_TYPE_AB = Genotype(
+    measure=[
+        ('measurement', 15)
+    ],
+    vpqc=[
+        ('variationalPQC', 0),
+        ('variationalPQC', 3),
+        ('variationalPQC', 6),
+        ('variationalPQC', 9),
+        ('variationalPQC', 12),
+        # ('variationalPQC', 15),
+    ],
+    dpqc=[
+        ('dataencodingPQC', 2),
+        ('dataencodingPQC', 5),
+        ('dataencodingPQC', 8),
+        ('dataencodingPQC', 11),
+        ('dataencodingPQC', 14),
+    ],
+    entangle=[
+        ('entanglement', 1),
+        ('entanglement', 4),
+        ('entanglement', 7),
+        ('entanglement', 10),
+        ('entanglement', 13),
+    ],
+)
+
+SEARCH_TYPE_CP_ID_58 = Genotype(
+    measure=[
+        ('measurement', 8)
+    ],
+    vpqc=[
+        ('variationalPQC', 2),
+        ('variationalPQC', 6)
+    ],
+    dpqc=[
+        ('dataencodingPQC', 1),
+        ('dataencodingPQC', 4),
+        ('dataencodingPQC', 5),
+        ('dataencodingPQC', 7)
+    ],
+    entangle=[
+        ('entanglement', 0),
+        ('entanglement', 3)
+    ]
+)
+

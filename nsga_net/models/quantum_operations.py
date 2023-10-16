@@ -5,7 +5,8 @@ import sympy
 # Organize components defined below to quantum operations
 OPS = {
     'variationalPQC': lambda qubits, position, params: generate_vpqc(qubits, position, params),
-    'dataencodingPQC': lambda qubits, position, count, params, state: generate_dpqc(qubits, position, count, params, state),
+    'dataencodingPQC': lambda qubits, position, count, params, state: generate_dpqc(qubits, position, count, params,
+                                                                                    state),
     'entanglement': lambda qubits: generate_entangle(qubits)
 }
 
@@ -36,10 +37,10 @@ def generate_vpqc(qubits, position, params=None):
     n_qubits = len(qubits)
 
     # Sympy symbols or load parameters for variational angles 
-    if params == None:
-        params = sympy.symbols(f'theta({3*position*n_qubits}:{3*(position+1)*n_qubits})')
+    if params is None:
+        params = sympy.symbols(f'theta({3 * position * n_qubits}:{3 * (position + 1) * n_qubits})')
     else:
-        params = params[3*position*n_qubits:3*(position+1)*n_qubits]
+        params = params[3 * position * n_qubits:3 * (position + 1) * n_qubits]
     params = np.asarray(params).reshape((n_qubits, 3))
 
     # Define circuit
@@ -57,10 +58,10 @@ def generate_dpqc(qubits, position, count, params=None, state=None):
     n_qubits = len(qubits)
 
     # Sympy symbols or load parameters for encoding angles
-    if params == None:
-        inputs = sympy.symbols(f'x{position}'+f'_(0:{n_qubits})')
+    if params is None:
+        inputs = sympy.symbols(f'x{position}' + f'_(0:{n_qubits})')
     else:
-        inputs = params[count*n_qubits:(count+1)*n_qubits]
+        inputs = params[count * n_qubits:(count + 1) * n_qubits]
         for i in range(len(state)):
             inputs[i] *= state[i]
     inputs = np.asarray(inputs).reshape((n_qubits))
@@ -78,19 +79,7 @@ def generate_entangle(qubits):
     """Prepare a entangle circuit on `qubits`."""
     # Define circuit
     circuit = cirq.Circuit()
-    
+
     circuit += entangling_layer(qubits)
 
     return circuit
-
-
-
-
-
-
-
-
-
-
-
-
