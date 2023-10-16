@@ -38,11 +38,6 @@ parser.add_argument('--lr_out', type=float, default=0.1, help='learning rate of 
 parser.add_argument('--lr_critic', type=float, default=0.1, help='learning rate of critic')
 parser.add_argument('--beta', type=float, default=1.0, help='output parameter')
 parser.add_argument('--model_path', type=str, default='../weights/example/ppo/ppo_simulator/all_state_normalize/weights_CP_ACTOR_NO_amsgrad.h5', help='path of pretrained model')
-# parser.add_argument('--model_path', type=str, default='./weights/train_p18/weights_id10_quafu_86.h5',
-#                     help='path of pretrained model')
-# parser.add_argument('--backend', type=str, default='quafu', help='choose cirq simulator or quafu cloud platform')
-# parser.add_argument('--shots', type=int, default=1000, help='the number of sampling')
-# parser.add_argument('--backend_quafu', type=str, default='ScQ-P10', help='which quafu backend to use')
 
 args = parser.parse_args(args=[])
 args.save = 'infer-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
