@@ -9,11 +9,9 @@ During evolutionary process, multi-objective is set to gain higher performance i
 
 Then, according to the effective architecture selected, one can train the model with Cirq simulator or Quafu backend. This file provides pre-trained model in './weights' of both ways and visualize them with animation in './visualization'. Noticeablely, we support three different environments including CartPole, MountainCar and Acrobot.
 
-![image2](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_CartPole_96.gif)
-
-![image3](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_MC_PPO.gif)
-
-![image4](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_AB_PPO.gif)
+| CartPole | MountainCar | Acrobot |
+|:-------------:|:-------------:|:-------------:|
+| ![Image2]([image1.jpg](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_CartPole_96.gif)) | ![Image3]([image2.jpg](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_MC_PPO.gif)) | ![Image4]([image3.jpg](https://github.com/enchanted123/quantum-RL-with-quafu/blob/main/img/gym_AB_PPO.gif)) |
 
 # Usage
 If you want to use the pre-trained model directly, the jupyter notebook in repo shows how to interact with Quafu and can output a gif if you have an access to display or you can refer to test code in './validation' to infer pre-trained model and get corresponding records in a 'log.txt' or '.csv'.
