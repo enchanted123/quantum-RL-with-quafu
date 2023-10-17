@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-sys.path.insert(0, ' ')
+# sys.path.insert(0, ' ')
 from functools import reduce
 
 import cirq

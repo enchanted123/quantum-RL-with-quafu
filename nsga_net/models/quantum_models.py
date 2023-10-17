@@ -6,7 +6,7 @@ import tensorflow_quantum as tfq
 from models.quantum_operations import *
 
 
-def generate_circuit(qubits, genotype, newtheta=None, newlamda=None, state=None):
+def generate_circuit(qubits, genotype, newtheta=None, newlamda=None, state=None, using_H=False):
     """Prepare a NSGANet circuit on `qubits` with `genotype` layers."""
     op_vpqc, pos_vpqc = zip(*genotype.vpqc)
     op_dpqc, pos_dpqc = zip(*genotype.dpqc)
@@ -29,6 +29,13 @@ def generate_circuit(qubits, genotype, newtheta=None, newlamda=None, state=None)
     inputs = []
     p_count = 0
     i_count = 0
+
+    if using_H:
+        # 文章中还有这个H
+        # 希望能让收敛次数更加稳定
+        # 通过H门先让所有的量子比特进入叠加态 能够 明显的减少 收敛次数不稳定 以及减少收敛次数
+        circuit += cirq.Circuit(cirq.H(q) for _, q in enumerate(qubits))
+
     for i in range(length):
         if dict[i] == 'variationalPQC':
             cir, pa = OPS[dict[i]](qubits, p_count, newtheta)
@@ -56,6 +63,7 @@ def generate_circuit(qubits, genotype, newtheta=None, newlamda=None, state=None)
     return circuit, params, inputs
 
 
+
 def get_model_circuit_params(qubits, genotype, model):
     """Get parameters from trained model"""
     theta, lamda = model.get_layer('nsganet_PQC').get_weights()
@@ -78,13 +86,14 @@ def get_model_circuit_params(qubits, genotype, model):
 
 class NSGANetPQC(tf.keras.layers.Layer):
     """Define NSGANet PQC based on keras layer"""
-    def __init__(self, qubits, genotype, observables, activation="linear", name="nsganet_PQC"):
+    # def __init__(self, qubits, genotype, observables, activation="linear", name="nsganet_PQC"):
+    def __init__(self, qubits, genotype, observables, activation="tanh", name="nsganet_PQC", using_H=False):
         super(NSGANetPQC, self).__init__(name=name)
         self.n_qubits = len(qubits)
         _, pos_dpqc = zip(*genotype.dpqc)
         self.n_layers = len(pos_dpqc)
 
-        circuit, theta_symbols, input_symbols = generate_circuit(qubits, genotype)
+        circuit, theta_symbols, input_symbols = generate_circuit(qubits, genotype, using_H=using_H)
 
         theta_init = tf.random_uniform_initializer(minval=0.0, maxval=np.pi)
         self.theta = tf.Variable(
@@ -122,25 +131,39 @@ class NSGANetPQC(tf.keras.layers.Layer):
 
 class Alternating(tf.keras.layers.Layer):
     """Apply action-specific weights."""
+
     def __init__(self, output_dim, env):
         super(Alternating, self).__init__()
+        self.env = env
         if env == "CartPole-v1":
+            print(env)
             self.w = tf.Variable(
-                initial_value=tf.constant([[(-1.)**i for i in range(output_dim)]]), dtype="float32",
+                initial_value=tf.constant([[(-1.) ** i for i in range(output_dim)]]), dtype="float32",
                 trainable=True, name="obs-weights")
         elif env == "MountainCar-v0":
+            print(env)
             self.w = tf.Variable(
-                initial_value=tf.constant([[(-1.)**i for i in range(output_dim)], [(-1.)**i for i in range(output_dim)],
-                [(-1.)**i for i in range(output_dim)]]), dtype="float32", trainable=True, name="obs-weights")
+                initial_value=tf.constant([1., 1., 1.]), dtype="float32", trainable=True, name="obs-weights")
+        elif env == "Acrobot-v1":
+            print(env)
+            self.w = tf.Variable(
+                initial_value=tf.constant(
+                    [[1.0, 1.0, 1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]]),
+                dtype="float32", trainable=True, name="obs-weights")
 
     def call(self, inputs):
-        return tf.matmul(inputs, self.w)
+        if self.env == "CartPole-v1":
+            return tf.matmul(inputs, self.w)
+        elif self.env == "MountainCar-v0":
+            return tf.einsum("i,ji->ji", self.w, inputs)
+        elif self.env == "Acrobot-v1":
+            return tf.einsum("ki,ji->jk", self.w, inputs)
 
 
-def generate_model_policy(qubits, genotype, n_actions, beta, observables, env):
+def generate_model_policy(qubits, genotype, n_actions, beta, observables, env, using_H=False):
     """Generate a Keras model for a NSGANet PQC policy."""
     input_tensor = tf.keras.Input(shape=(len(qubits), ), dtype=tf.dtypes.float32, name='input')
-    nsganet_pqc = NSGANetPQC(qubits, genotype, observables)([input_tensor])
+    nsganet_pqc = NSGANetPQC(qubits, genotype, observables, using_H=using_H)([input_tensor])
     process = tf.keras.Sequential([
         Alternating(n_actions, env),
         tf.keras.layers.Lambda(lambda x: x * beta),
